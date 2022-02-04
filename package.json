@@ -67,6 +67,7 @@
     "webpack-merge": "^4.1.4"
   },
   "dependencies": {
+    "diff-json": "^2.0.0",
     "opencollective": "^1.0.3",
     "opencollective-postinstall": "^2.0.2"
   },
