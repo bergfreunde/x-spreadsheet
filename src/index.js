@@ -157,7 +157,6 @@ class Spreadsheet {
       }
       for (const ci of Object.keys(row.cells)) {
         const { text } = rows.getCell(ri, parseInt(ci, 10));
-        console.log({ ri, ci, text });
         if (text !== null) {
           return ri;
         }
