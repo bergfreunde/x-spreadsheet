@@ -150,6 +150,9 @@ const rows = new Array(rowLength)
   }), {});
 
 const instance = Spreadsheet.getInstance('#x-spreadsheet-demo');
+instance.on('cell-selected', (cell, ri, ci) => {
+  console.log({ cell, ri, ci });
+});
 
 const numberFormat = { format: 'number' };
 const excludeRows = [{ property: 'style', indices: [0] }];
