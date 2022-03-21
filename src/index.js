@@ -220,6 +220,9 @@ class Spreadsheet {
 
   static getInstance(selectors, options = {}) {
     if (!Spreadsheet.instance || Spreadsheet.instance.selectors !== selectors) {
+      for (const data of Spreadsheet.instance.dataSet) {
+        data.history.destroy();
+      }
       delete Spreadsheet.instance; // clean up old instance if any
       Spreadsheet.instance = new Spreadsheet(selectors, options);
     }
