@@ -219,11 +219,13 @@ class Spreadsheet {
   }
 
   static getInstance(selectors, options = {}) {
-    if (!Spreadsheet.instance || Spreadsheet.instance.selectors !== selectors) {
-      for (const data of Spreadsheet.instance.dataSet) {
-        data.history.destroy();
+    if (Spreadsheet.instance.selectors !== selectors) {
+      if (Spreadsheet.instance) {
+        for (const data of Spreadsheet.instance.dataSet) {
+          data.history.destroy();
+        }
+        delete Spreadsheet.instance; // clean up old instance if any
       }
-      delete Spreadsheet.instance; // clean up old instance if any
       Spreadsheet.instance = new Spreadsheet(selectors, options);
     }
     Spreadsheet.instance.options = { ...this.options, ...options };
