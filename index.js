@@ -149,7 +149,7 @@ const rows = new Array(rowLength)
     ...curr,
   }), {});
 
-const instance = Spreadsheet.getInstance('#x-spreadsheet-demo');
+const instance = new Spreadsheet('#x-spreadsheet-demo');
 instance.on('cell-selected', (cell, ri, ci) => {
   console.log({ cell, ri, ci });
 });

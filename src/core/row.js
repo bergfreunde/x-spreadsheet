@@ -471,6 +471,12 @@ class Rows {
     return Object.assign({ len }, this._);
   }
 
+  destroy() {
+    delete this._;
+    delete this.len;
+    delete this.height;
+  }
+
   static reduceAsRows(iterable, len) {
     const rows = {
       ...(len ? { len } : {}),
