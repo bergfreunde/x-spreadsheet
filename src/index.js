@@ -219,7 +219,7 @@ class Spreadsheet {
   }
 
   static getInstance(selectors, options = {}) {
-    if (Spreadsheet.instance.selectors !== selectors) {
+    if (!Spreadsheet.instance || Spreadsheet.instance.selectors !== selectors) {
       if (Spreadsheet.instance) {
         for (const data of Spreadsheet.instance.dataSet) {
           data.history.destroy();
