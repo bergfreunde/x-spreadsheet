@@ -21,6 +21,7 @@ import SortFilter from './sort_filter';
 import { xtoast } from './message';
 import { cssPrefix } from '../config';
 import { formulas } from '../core/formula';
+import { Rows } from '../core/row';
 
 /**
  * @desc throttle fn
@@ -114,13 +115,17 @@ function selectorSet(multiple, ri, ci, indexesUpdated = true, moving = false) {
   }
 
   const { initialState } = data.history;
-
+  const [height, width] = selector.range.size();
   const options = {
-    cols: { len: initialState.cols.len - 1, current: sci },
-    rows: { len: initialState.rows.len - 1, current: sri },
+    height,
+    width,
+    ...(insertAtEnd ? {
+      cols: { len: initialState.cols.len - 1, eci },
+      rows: { len: initialState.rows.len - 1, eri },
+    } : {}),
   };
 
-  contextMenu.setMode(mode, insertAtEnd ? options : null);
+  contextMenu.setMode(mode, options);
   toolbar.reset();
   table.render();
 }
@@ -419,7 +424,7 @@ function paste(what) {
     }
     let cdiff = 0;
     let rdiff = 0;
-    if (!useSystemClipboard && data.paste(what, dataSet, msg => xtoast('Tip', msg))) {
+    if (!useSystemClipboard && data.paste(what, dataSet, msg => xtoast('Error', msg))) {
       cdiff = data.clipboard.range.eci - data.clipboard.range.sci;
       rdiff = data.clipboard.range.eri - data.clipboard.range.sri;
     } else {
@@ -434,7 +439,7 @@ function paste(what) {
     this.selector.moveIndexes = [sri + rdiff, sci + cdiff];
     selectorSet.call(this, true, sri + rdiff, sci + cdiff, true);
   }).catch((err) => {
-    xtoast('Tip', err);
+    xtoast('Caught error', err);
   });
 }
 
@@ -621,26 +626,41 @@ function dataSetCellText(text, state = 'finished') {
 function insertDeleteRowColumn(type) {
   const { data, selector } = this;
   if (data.settings.mode === 'read') return;
+  const [hi, wi] = selector.range.size();
   if (type === 'insert-row') { // insert row above
-    data.insert('row', 1, true, {}, (ri, ci) => {
-      selector.set(ri, ci);
+    data.insert('row', hi, true, (ri, ci) => {
+      setTimeout(() => {
+        selector.setStartEnd(ri, ci, ri + hi - 1, ci);
+      }, 1);
     });
   } else if (type === 'insert-row-below') {
-    data.insert('row', 1, false, {}, (ri, ci) => {
-      selector.set(ri, ci);
+    data.insert('row', hi, false, (ri, ci) => {
+      setTimeout(() => {
+        selector.setStartEnd(ri + hi - 1, ci, ri, ci);
+      }, 1);
     });
   } else if (type === 'delete-row') {
     data.delete('row');
+    if (selector.range.eri > data.rows.len - 1) {
+      selector.set(data.rows.len - 1, -1);
+    }
   } else if (type === 'insert-column') { // insert column left
-    data.insert('column', 1, true, {}, (ri, ci) => {
-      selector.set(ri, ci);
+    data.insert('column', wi, true, (ri, ci) => {
+      setTimeout(() => {
+        selector.setStartEnd(ri, ci, ri, ci + wi - 1);
+      }, 1);
     });
   } else if (type === 'insert-column-right') {
-    data.insert('column', 1, false, {}, (ri, ci) => {
-      selector.set(ri, ci);
+    data.insert('column', wi, false, (ri, ci) => {
+      setTimeout(() => {
+        selector.setStartEnd(ri, ci + wi - 1, ri, ci);
+      }, 1);
     });
   } else if (type === 'delete-column') {
     data.delete('column');
+    if (selector.range.eci > data.cols.len - 1) {
+      selector.set(-1, data.cols.len - 1);
+    }
   } else if (type === 'delete-cell') {
     data.deleteCell();
   } else if (type === 'delete-cell-format') {
@@ -785,12 +805,7 @@ function sheetInitEvents() {
       // the left mouse button: mousedown → mouseup → click
       // the right mouse button: mousedown → contenxtmenu → mouseup
       if (evt.buttons === 2) {
-        if (this.data.xyInSelectedRect(evt.offsetX, evt.offsetY)) {
-          contextMenu.setPosition(evt.offsetX, evt.offsetY);
-        } else {
-          overlayerMousedown.call(this, evt);
-          contextMenu.setPosition(evt.offsetX, evt.offsetY);
-        }
+        contextMenu.setPosition(evt.offsetX, evt.offsetY);
         evt.stopPropagation();
       } else if (evt.detail === 2) {
         editorSet.call(this);
@@ -991,11 +1006,13 @@ function sheetInitEvents() {
           // ctrl + I
           toolbar.trigger('italic');
           break;
-        case 70:
+        case 70: {
           // ctrl + f
-          evt.preventDefault();
+          this.modalFind.setRange(selector.range);
           this.modalFind.show();
+          evt.preventDefault();
           break;
+        }
         case 67: // ctrl + c
         case 86: // ctrl + v
         default:
@@ -1093,37 +1110,58 @@ function sheetInitEvents() {
 }
 
 function find(val, idx, replace, replaceWith = '', matchCase = false, matchCellContents = false) {
-  const { data, table } = this;
+  const { data, table, modalFind } = this;
   const { rows } = data;
   const foundCells = [];
   const soughtValue = matchCase ? val : val.toLowerCase();
-  rows.each((ri) => {
-    rows.eachCells(ri, (ci, { text }) => {
-      const txt = matchCase ? `${text}` : `${text}`.toLowerCase();
-      const condition = matchCellContents
-        ? txt === val : txt.includes(soughtValue);
-      if (condition) {
-        foundCells.push({ ri, ci, text });
-        if (replace === 'all') {
-          data.setCellTextRaw(ri, ci, text.replace(new RegExp(soughtValue, 'i'), replaceWith));
-        }
+
+  const populateCells = (ri, ci, text) => {
+    const txt = matchCase ? `${text}` : `${text}`.toLowerCase();
+    const condition = matchCellContents
+      ? txt === soughtValue : txt.includes(soughtValue);
+    if (condition) {
+      foundCells.push({ ri, ci, text });
+      if (replace === 'all') {
+        data.setCellTextRaw(ri, ci, text.replace(new RegExp(soughtValue, 'i'), replaceWith));
       }
+    }
+  };
+
+  if (modalFind.selected === 'range') {
+    modalFind.range.each((ri, ci) => {
+      const { text } = data.getCell(ri, ci);
+      populateCells(ri, ci, `${text}`);
     });
-  });
+  } else {
+    rows.each((ri) => {
+      rows.eachCells(ri, (ci, { text }) => {
+        populateCells(ri, ci, `${text}`);
+      });
+    });
+  }
 
   if (!foundCells.length) {
     return -1;
   }
 
   if (replace === 'all') {
+    data.history.add([
+      Rows.reduceAsRows(foundCells.map(({ ri, ci }) => ({ ri, ci, cell: data.getCell(ri, ci) }))),
+      data.selector.rangeObject,
+    ]);
     table.render();
     return foundCells.length;
   }
 
-  let { ri, ci } = foundCells[idx];
+  let { ri, ci } = foundCells[idx] || {};
+
+  if (!ri || !ci) {
+    return 0;
+  }
+
   const { text } = foundCells[idx];
   if (replace === 'current') {
-    data.setCellText(ri, ci, text.replace(new RegExp(soughtValue, 'i'), replaceWith));
+    data.setCellText(ri, ci, text.replace(new RegExp(soughtValue, 'i'), replaceWith), 'finished');
     ({ ri, ci } = foundCells[(idx + 1 === foundCells.length) ? 0 : idx + 1]);
   }
 
@@ -1295,14 +1333,12 @@ export default class Sheet {
     sri, sci, eri, eci,
   }) {
     if ([sri, sci].every(v => v !== undefined)) {
-      if ([eri, eci].every(v => v === undefined)) {
-        this.selector.set(
-          this.data.rows.len === sri ? sri - 1 : sri,
-          this.data.cols.len === sci ? sci - 1 : sci,
-        );
-      } else {
-        this.selector.setStartEnd(sri, sci, eri, eci);
-      }
+      this.selector.setStartEnd(
+        sri > this.data.rows.len - 1 ? this.data.rows.len - 1 : sri,
+        sci > this.data.cols.len - 1 ? this.data.cols.len - 1 : sci,
+        sri > this.data.rows.len - 1 ? this.data.rows.len - 1 : eri,
+        sci > this.data.cols.len - 1 ? this.data.cols.len - 1 : eci,
+      );
       setTimeout(() => {
         scrollbarMove.call(this);
       }, 1);

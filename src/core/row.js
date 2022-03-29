@@ -157,7 +157,10 @@ class Rows {
               for (let jj = dsci; jj <= deci; jj += cn) {
                 const nri = ii + (i - sri);
                 const nci = jj + (j - sci);
-                if ('editable' in this._[nri].cells[nci] && !this._[nri].cells[nci].editable) {
+                if (this._[nri]
+                  && this._[nri].cells[nci]
+                  && 'editable' in this._[nri].cells[nci]
+                  && !this._[nri].cells[nci].editable) {
                   // eslint-disable-next-line no-continue
                   continue;
                 }
@@ -306,9 +309,12 @@ class Rows {
     this._ = ndata;
     this.len += n;
     // add cells from inserted row
-    this.eachCells(sri + 1, (ci) => {
-      changedCells.push({ ri: sri, ci: parseInt(ci, 10), cell: { text: null } });
+    this.eachCells(sri + n, (ci) => {
+      for (let i = 0; i < n; i += 1) {
+        changedCells.push({ ri: sri + i, ci: parseInt(ci, 10), cell: { text: null } });
+      }
     });
+
     return Rows.reduceAsRows(changedCells, this.len);
   }
 
@@ -358,11 +364,13 @@ class Rows {
       });
       row.cells = rndata;
       // add cells for the inserted column
-      changedCells.push({
-        ri: parseInt(ri, 10),
-        ci: sci,
-        cell: { text: null },
-      });
+      for (let i = 0; i < n; i += 1) {
+        changedCells.push({
+          ri: parseInt(ri, 10),
+          ci: sci + i,
+          cell: { text: null },
+        });
+      }
     });
     return Rows.reduceAsRows(changedCells);
   }

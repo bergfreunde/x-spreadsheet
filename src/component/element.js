@@ -136,6 +136,9 @@ class Element {
   */
 
   child(arg) {
+    if (!arg) {
+      return this;
+    }
     let ele = arg;
     if (typeof arg === 'string') {
       ele = document.createTextNode(arg);
@@ -273,6 +276,11 @@ class Element {
   hide() {
     this.css('display', 'none');
     return this;
+  }
+
+  click() {
+    const { el } = this;
+    el.click();
   }
 }
 
