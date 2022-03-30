@@ -1376,9 +1376,7 @@ export default class DataProxy {
 
   freezeViewRange() {
     const [ri, ci] = this.freeze;
-    const fViewRange = new CellRange(0, 0, ri - 1, ci - 1, this.freezeTotalWidth(), this.freezeTotalHeight());
-    console.log('freezeViewRange:', fViewRange);
-    return fViewRange;
+    return new CellRange(0, 0, ri - 1, ci - 1, this.freezeTotalWidth(), this.freezeTotalHeight());
   }
 
   contentRange() {
@@ -1417,9 +1415,12 @@ export default class DataProxy {
     let incr = 0;
     for (let i = ri; i < rows.len; i += 1) {
       if (!exceptRowSet.has(i)) {
+        rows.unlock(i);
         y += rows.getHeight(i);
         eri = ri + incr;
         incr += 1;
+      } else {
+        rows.lock(i);
       }
       if (y > this.viewHeight()) break;
     }
