@@ -1121,7 +1121,11 @@ function find(val, idx, replace, replaceWith = '', matchCase = false, matchCellC
     const condition = matchCellContents
       ? txt === soughtValue : txt.includes(soughtValue);
     if (condition) {
-      foundCells.push({ ri, ci, text });
+      let nri = ri;
+      if (data.sortedRowMap.has(ri)) {
+        nri = data.sortedRowMap.get(ri);
+      }
+      foundCells.push({ ri: nri, ci, text });
       if (replace === 'all') {
         data.setCellTextRaw(ri, ci, text.replace(new RegExp(soughtValue, 'i'), replaceWith));
       }
