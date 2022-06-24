@@ -7,7 +7,7 @@ import { cssPrefix } from './config';
 import { locale } from './locale/locale';
 import Cr from './core/cell_range';
 
-class Spreadsheet {
+export class Spreadsheet {
   constructor(selectors, options = {}) {
     this.selectors = selectors;
     let targetEl = selectors;
@@ -236,9 +236,6 @@ class Spreadsheet {
   }
 }
 
-const spreadsheet = (el, options = {}) => new Spreadsheet(el, options);
+export const spreadsheet = (el, options = {}) => new Spreadsheet(el, options);
 
 export default Spreadsheet;
-export {
-  spreadsheet,
-};
