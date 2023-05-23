@@ -312,6 +312,43 @@ class Table {
     this.dataSet = dataSet;
   }
 
+  renderDates() {
+    const { data, dataSet } = this;
+    const contentRange = data.contentRange();
+
+    contentRange.each((i, ci) => {
+      const ri = data.rowMap.get(i);
+      const format = data.getCellStyleOrDefault2(ri, ci);
+      if (format === 'date') {
+        const { sortedRowMap, rows, cols } = data;
+        if (rows.isHide(ri) || cols.isHide(ci)) return;
+        let nrindex = ri;
+        if (sortedRowMap.has(ri)) {
+          nrindex = sortedRowMap.get(ri);
+        }
+
+        const cell = data.getCell(nrindex, ci);
+        let cellText = '';
+        if (!data.settings.evalPaused) {
+          cellText = _cell.render(cell.text === null ? '' : cell.text, formulam, (y, x, d) => {
+            if (!d) return (data.getCellTextOrDefault(x, y));
+            const xSheet = dataSet.find(({ name }) => name === d);
+            if (xSheet) {
+              return xSheet.getCellTextOrDefault(x, y);
+            }
+            return '#REF!';
+          });
+        } else {
+          cellText = cell.text === null ? '' : cell.text;
+        }
+        formatm[format].render(
+          cellText,
+          format === 'date' ? (n) => { rows.setCellText(nrindex, ci, n); } : undefined,
+        );
+      }
+    }, (i) => data.rowMap.has(i));
+  }
+
   get data() {
     return this.dataSet[this.dataIndex];
   }
