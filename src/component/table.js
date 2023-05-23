@@ -318,7 +318,7 @@ class Table {
 
     contentRange.each((i, ci) => {
       const ri = data.rowMap.get(i);
-      const format = data.getCellStyleOrDefault2(ri, ci);
+      const format = data.getCellStyleFormat(ri, ci);
       if (format === 'date') {
         const { sortedRowMap, rows, cols } = data;
         if (rows.isHide(ri) || cols.isHide(ci)) return;
