@@ -1306,6 +1306,13 @@ export default class DataProxy {
     return helper.merge(this.defaultStyle(), cellStyle);
   }
 
+  getCellStyleFormat(ri, ci) {
+    const { styles, rows } = this;
+    const cell = rows.getCell(ri, ci);
+    const cellStyle = (cell && cell.style !== undefined) ? styles[cell.style] : {};
+    return cellStyle.format;
+  }
+
   getSelectedCellStyle() {
     const { ri, ci } = this.selector;
     return this.getCellStyleOrDefault(ri, ci);
