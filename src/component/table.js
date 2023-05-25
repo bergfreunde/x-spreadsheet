@@ -93,7 +93,6 @@ export function renderCell(
     if (style.format) {
       cellText = formatm[style.format].render(
         cellText,
-        style.format === 'date' ? (n) => { rows.setCellText(nrindex, cindex, n); } : undefined,
       );
     }
     const font = Object.assign({}, style.font);
@@ -310,43 +309,6 @@ class Table {
     this.draw = new Draw(el, dataSet[idx].viewWidth(), dataSet[idx].viewHeight());
     this.dataIndex = idx;
     this.dataSet = dataSet;
-  }
-
-  renderDates() {
-    const { data, dataSet } = this;
-    const contentRange = data.contentRange();
-
-    contentRange.each((i, ci) => {
-      const ri = data.rowMap.get(i);
-      const format = data.getCellStyleFormat(ri, ci);
-      if (format === 'date') {
-        const { sortedRowMap, rows, cols } = data;
-        if (rows.isHide(ri) || cols.isHide(ci)) return;
-        let nrindex = ri;
-        if (sortedRowMap.has(ri)) {
-          nrindex = sortedRowMap.get(ri);
-        }
-
-        const cell = data.getCell(nrindex, ci);
-        let cellText = '';
-        if (!data.settings.evalPaused) {
-          cellText = _cell.render(cell.text === null ? '' : cell.text, formulam, (y, x, d) => {
-            if (!d) return (data.getCellTextOrDefault(x, y));
-            const xSheet = dataSet.find(({ name }) => name === d);
-            if (xSheet) {
-              return xSheet.getCellTextOrDefault(x, y);
-            }
-            return '#REF!';
-          });
-        } else {
-          cellText = cell.text === null ? '' : cell.text;
-        }
-        formatm[format].render(
-          cellText,
-          format === 'date' ? (n) => { rows.setCellText(nrindex, ci, n); } : undefined,
-        );
-      }
-    }, (i) => data.rowMap.has(i));
   }
 
   get data() {
