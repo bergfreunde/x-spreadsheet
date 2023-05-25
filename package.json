@@ -66,6 +66,7 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
+    "any-date-parser": "^1.5.4",
     "opencollective": "^1.0.3",
     "opencollective-postinstall": "^2.0.3"
   },
