@@ -1,6 +1,5 @@
+import dateParser from 'any-date-parser';
 import { tf } from '../locale/locale';
-
-require('any-date-parser');
 
 const formatStringRender = (v) => v;
 
@@ -99,7 +98,7 @@ const baseFormats = [
       }
 
       try {
-        const date = Date.fromString(v);
+        const date = dateParser.fromString(v);
         const [yyyymmdd] = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().split('T');
         return `${yyyymmdd}`;
       } catch (err) {
