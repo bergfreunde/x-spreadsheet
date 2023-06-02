@@ -1530,7 +1530,7 @@ export default class DataProxy {
       Object.entries(val.cells).forEach(([ci, cell]) => {
         const format = this.getCellStyleFormat(ri, ci);
         if (format === 'date' && cell.text) {
-          cell.text = formatm.date.render(cell.text);
+          cell.text = formatm[format].render(cell.text);
         }
       });
     });
