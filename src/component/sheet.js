@@ -611,6 +611,7 @@ function colResizerFinished(cRect, distance) {
 
 function dataSetCellText(text, state = 'finished') {
   const { data, table, editor } = this;
+  const { rows } = data;
   // const [ri, ci] = selector.indexes;
   if (data.settings.mode === 'read') return;
   const unalteredCell = editor.initial === text;
@@ -620,6 +621,7 @@ function dataSetCellText(text, state = 'finished') {
   );
   const { ri, ci } = data.selector;
   if (state === 'finished') {
+    data.initSpecialFormats([rows.getData()[ri]]);
     const style = data.getCellStyle(ri, ci);
     table.render();
     if (style && 'format' in style) {
