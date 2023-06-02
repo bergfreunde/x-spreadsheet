@@ -621,7 +621,13 @@ function dataSetCellText(text, state = 'finished') {
   );
   const { ri, ci } = data.selector;
   if (state === 'finished') {
-    data.initSpecialFormats([rows.getData()[ri]]);
+    const changedRows = {
+      [ri]: {
+        cells: rows.getData()[ri].cells,
+      },
+    };
+    data.initSpecialFormats(changedRows);
+
     const style = data.getCellStyle(ri, ci);
     table.render();
     if (style && 'format' in style) {
