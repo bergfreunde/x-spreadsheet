@@ -94,7 +94,7 @@ class Spreadsheet {
     return this.dataSet.map((it) => it.getData());
   }
 
-  cellText(ri, ci, text, force = false, saveHistory = false, sheetIndex = 0) {
+  cellText(ri, ci, text, force = false, saveHistory = true, sheetIndex = 0) {
     this.sheet.clearEditor();
 
     if (saveHistory) {
