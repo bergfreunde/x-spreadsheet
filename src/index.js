@@ -94,27 +94,16 @@ class Spreadsheet {
     return this.dataSet.map((it) => it.getData());
   }
 
-  cellText(ri, ci, text, force = false, saveHistory = true, sheetIndex = 0) {
+  cellText(ri, ci, text, force = false, sheetIndex = 0) {
     this.sheet.clearEditor();
-
-    if (saveHistory) {
-      this.dataSet[sheetIndex].setCellText(ri, ci, text, 'finished');
-    } else {
-      this.dataSet[sheetIndex].setCellTextRaw(ri, ci, text, force);
-    }
-
+    this.dataSet[sheetIndex].setCellTextRaw(ri, ci, text, force);
     return this;
   }
 
-  resetCellText(sri, sci, eri, eci, force = false, reRender = true, sheetIndex = 0) {
+  cellTexts(cellDataArray, sheetIndex = 0) {
     this.sheet.clearEditor();
-    const cr = new Cr(sri, sci, eri, eci);
-    cr.each((ri, ci) => {
-      this.dataSet[sheetIndex].setCellTextRaw(ri, ci, null, force);
-    });
-    if (reRender) {
-      this.reRender();
-    }
+    this.dataSet[sheetIndex].setCellTexts(cellDataArray);
+    return this;
   }
 
   cell(ri, ci, sheetIndex = 0) {
