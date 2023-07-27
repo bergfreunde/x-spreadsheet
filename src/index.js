@@ -106,6 +106,16 @@ class Spreadsheet {
     return this;
   }
 
+  resetCellText(sri, sci, eri, eci, force = false, reRender = true, sheetIndex = 0) {
+    const cr = new Cr(sri, sci, eri, eci);
+    cr.each((ri, ci) => {
+      this.dataSet[sheetIndex].setCellTextRaw(ri, ci, null, force);
+    });
+    if (reRender) {
+      this.reRender();
+    }
+  }
+
   cell(ri, ci, sheetIndex = 0) {
     this.sheet.clearEditor();
     return this.dataSet[sheetIndex].getCell(ri, ci);
