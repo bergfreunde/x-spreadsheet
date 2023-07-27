@@ -100,9 +100,15 @@ class Spreadsheet {
     return this;
   }
 
-  cellTexts(cellDataArray, sheetIndex = 0) {
+  cellTexts(cellDataArray, saveHistory = true, force = false, sheetIndex = 0) {
     this.sheet.clearEditor();
-    this.dataSet[sheetIndex].setCellTexts(cellDataArray);
+    if (saveHistory) {
+      this.dataSet[sheetIndex].setCellTexts(cellDataArray);
+    } else {
+      for (const cellData of cellDataArray) {
+        this.dataSet[sheetIndex].setCellTextRaw(cellData.ri, cellData.ci, cellData.text, force);
+      }
+    }
     return this;
   }
 

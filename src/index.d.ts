@@ -257,10 +257,14 @@ declare module '@bergfreunde/x-data-spreadsheet' {
     /**
      * get/set cell texts
      * @param cellTexts
+     * @param saveHistory
+     * @param force
      * @param sheetIndex
      */
     cellTexts(
       cellTexts: CellTextData[],
+      saveHistory: boolean,
+      force: boolean,
       sheetIndex?: number
     ): this;
 
