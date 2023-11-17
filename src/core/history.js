@@ -68,8 +68,8 @@ export default class History {
       if (
         rows[ri].cells[ci] !== null
         && (
-          (rows[ri].cells[ci].text === null && parsedInitial.rows[ri].cells[ci] !== null)
-           || (rows[ri].cells[ci].text !== null && parsedInitial.rows[ri].cells[ci] === null)
+          (rows[ri].cells[ci].text === null && parsedInitial.rows[ri].cells[ci].text !== null)
+           || (rows[ri].cells[ci].text !== null && parsedInitial.rows[ri].cells[ci].text === null)
            || parsedInitial.rows[ri].cells[ci].text !== rows[ri].cells[ci].text)) {
         val = rows[ri].cells[ci].text;
       }
