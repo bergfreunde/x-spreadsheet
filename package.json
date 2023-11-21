@@ -1,6 +1,6 @@
 {
   "name": "@bergfreunde/x-data-spreadsheet",
-  "version": "2.0.72",
+  "version": "2.0.73",
   "description": "a javascript xpreadsheet",
   "types": "src/index.d.ts",
   "main": "src/index.js",
